@@ -1,6 +1,6 @@
 Σ Sigma Terminal
 
-> Institutional Financial Research Platform built with Python.
+>  Financial Research Platform built with Python.
 
 Sigma Terminal is a Bloomberg-inspired financial analytics platform designed to provide professional tools for market analysis, portfolio management, quantitative research, and risk analytics.
 

@@ -1,1 +1,1 @@
-Σ
+Σ Sigma Terminal

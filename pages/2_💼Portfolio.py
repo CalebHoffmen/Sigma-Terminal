@@ -9,7 +9,7 @@ import yfinance as yf
 
 
 st.set_page_config(
-    page_title="Portfolio | OptiQuant Terminal",
+    page_title="Portfolio | Sigma Terminal",
     page_icon="💼",
     layout="wide",
 )

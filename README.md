@@ -7,7 +7,7 @@ Sigma Terminal is a Bloomberg-inspired financial analytics platform designed to 
 ---
 
 ## Features
-
+ 
 ### Current
 
 - 📈 Live Market Dashboard

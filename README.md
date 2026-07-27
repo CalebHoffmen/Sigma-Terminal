@@ -79,3 +79,4 @@ Sigma-Terminal/
 The University of Texas at Austin
 
 Interested in Quantitative Finance, Financial Engineering, Portfolio Management, and Data Science.
+

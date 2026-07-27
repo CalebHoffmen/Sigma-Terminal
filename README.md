@@ -1,2 +1,1 @@
 Σ Sigma Terminal
-xxx

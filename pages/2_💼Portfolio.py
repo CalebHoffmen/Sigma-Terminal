@@ -6,8 +6,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
-
-
+from utils.portfolio import calculate_portfolio_history
+from utils.analytics import portfolio_risk_metrics
+from utils.data import (
+    download_current_prices,
+    download_historical_prices,
+)
 st.set_page_config(
     page_title="Portfolio | Sigma Terminal",
     page_icon="💼",
@@ -63,164 +67,6 @@ def clean_holdings(raw_holdings: pd.DataFrame) -> pd.DataFrame:
 
     return holdings.reset_index(drop=True)
 
-
-@st.cache_data(ttl=300)
-def download_current_prices(tickers: tuple[str, ...]) -> pd.Series:
-    if not tickers:
-        return pd.Series(dtype=float)
-
-    try:
-        data = yf.download(
-            list(tickers),
-            period="5d",
-            interval="1d",
-            auto_adjust=True,
-            progress=False,
-            group_by="column",
-        )
-
-        if data.empty:
-            return pd.Series(dtype=float)
-
-        close_data = data["Close"]
-
-        if isinstance(close_data, pd.Series):
-            return pd.Series(
-                {tickers[0]: float(close_data.dropna().iloc[-1])}
-            )
-
-        latest_prices = {}
-
-        for ticker in tickers:
-            if ticker in close_data.columns:
-                valid_prices = close_data[ticker].dropna()
-
-                if not valid_prices.empty:
-                    latest_prices[ticker] = float(valid_prices.iloc[-1])
-
-        return pd.Series(latest_prices, dtype=float)
-
-    except Exception:
-        return pd.Series(dtype=float)
-
-
-@st.cache_data(ttl=900)
-def download_historical_prices(
-    tickers: tuple[str, ...],
-    benchmark: str,
-    period: str,
-) -> pd.DataFrame:
-    symbols = list(dict.fromkeys([*tickers, benchmark]))
-
-    if not symbols:
-        return pd.DataFrame()
-
-    try:
-        data = yf.download(
-            symbols,
-            period=period,
-            interval="1d",
-            auto_adjust=True,
-            progress=False,
-        )
-
-        if data.empty:
-            return pd.DataFrame()
-
-        close_data = data["Close"]
-
-        if isinstance(close_data, pd.Series):
-            close_data = close_data.to_frame(symbols[0])
-
-        return close_data.ffill().dropna(how="all")
-
-    except Exception:
-        return pd.DataFrame()
-
-
-def calculate_portfolio_history(
-    prices: pd.DataFrame,
-    holdings: pd.DataFrame,
-    benchmark: str,
-) -> tuple[pd.Series, pd.Series]:
-    portfolio_tickers = [
-        ticker
-        for ticker in holdings["Ticker"]
-        if ticker in prices.columns
-    ]
-
-    if not portfolio_tickers:
-        return pd.Series(dtype=float), pd.Series(dtype=float)
-
-    shares = (
-        holdings.set_index("Ticker")
-        .loc[portfolio_tickers, "Shares"]
-    )
-
-    portfolio_value = (
-        prices[portfolio_tickers]
-        .mul(shares, axis=1)
-        .sum(axis=1)
-    )
-
-    portfolio_return_index = (
-        portfolio_value / portfolio_value.iloc[0]
-    )
-
-    if benchmark in prices.columns:
-        benchmark_prices = prices[benchmark].dropna()
-        benchmark_return_index = (
-            benchmark_prices / benchmark_prices.iloc[0]
-        )
-    else:
-        benchmark_return_index = pd.Series(dtype=float)
-
-    return portfolio_return_index, benchmark_return_index
-
-
-def calculate_risk_metrics(
-    return_index: pd.Series,
-) -> dict[str, float]:
-    if return_index.empty or len(return_index) < 2:
-        return {
-            "Total Return": np.nan,
-            "Annualized Return": np.nan,
-            "Annualized Volatility": np.nan,
-            "Sharpe Ratio": np.nan,
-            "Maximum Drawdown": np.nan,
-        }
-
-    daily_returns = return_index.pct_change().dropna()
-
-    total_return = return_index.iloc[-1] - 1
-
-    elapsed_years = max(len(return_index) / 252, 1 / 252)
-
-    annualized_return = (
-        return_index.iloc[-1] ** (1 / elapsed_years)
-    ) - 1
-
-    annualized_volatility = (
-        daily_returns.std() * np.sqrt(252)
-    )
-
-    sharpe_ratio = (
-        annualized_return / annualized_volatility
-        if annualized_volatility > 0
-        else np.nan
-    )
-
-    running_peak = return_index.cummax()
-    drawdown = return_index / running_peak - 1
-    maximum_drawdown = drawdown.min()
-
-    return {
-        "Total Return": total_return,
-        "Annualized Return": annualized_return,
-        "Annualized Volatility": annualized_volatility,
-        "Sharpe Ratio": sharpe_ratio,
-        "Maximum Drawdown": maximum_drawdown,
-    }
 
 
 st.title("💼 Portfolio Tracker")
@@ -452,6 +298,11 @@ if historical_prices.empty:
         "Historical portfolio performance could not be loaded."
     )
 else:
+    import inspect
+
+    st.write("FUNCTION FILE:", inspect.getsourcefile(calculate_portfolio_history))
+    st.write("FUNCTION SIGNATURE:", inspect.signature(calculate_portfolio_history))
+    st.code(inspect.getsource(calculate_portfolio_history))
     portfolio_index, benchmark_index = (
         calculate_portfolio_history(
             historical_prices,
@@ -499,7 +350,7 @@ else:
             use_container_width=True,
         )
 
-        portfolio_metrics = calculate_risk_metrics(
+        portfolio_metrics = portfolio_risk_metrics(
             portfolio_index
         )
 

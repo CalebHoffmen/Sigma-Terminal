@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
 from utils.portfolio import calculate_portfolio_history
+from utils.analytics import calculate_drawdown
 from utils.analytics import portfolio_risk_metrics
 from utils.data import (
     download_current_prices,
@@ -298,11 +299,6 @@ if historical_prices.empty:
         "Historical portfolio performance could not be loaded."
     )
 else:
-    import inspect
-
-    st.write("FUNCTION FILE:", inspect.getsourcefile(calculate_portfolio_history))
-    st.write("FUNCTION SIGNATURE:", inspect.signature(calculate_portfolio_history))
-    st.code(inspect.getsource(calculate_portfolio_history))
     portfolio_index, benchmark_index = (
         calculate_portfolio_history(
             historical_prices,
@@ -310,6 +306,31 @@ else:
             benchmark,
         )
     )
+    drawdown = calculate_drawdown(portfolio_index)
+    max_drawdown = drawdown.min()
+
+    st.metric(
+        "Maximum Drawdown",
+        f"{max_drawdown:.2%}"
+)
+    fig_drawdown = go.Figure()
+
+    fig_drawdown.add_trace(
+    go.Scatter(
+        x=drawdown.index,
+        y=drawdown * 100,
+        mode="lines",
+        name="Portfolio Drawdown",
+    )
+)
+
+    fig_drawdown.update_layout(
+        title="Portfolio Drawdown",
+        xaxis_title="Date",
+        yaxis_title="Drawdown (%)",
+)
+
+    st.plotly_chart(fig_drawdown, use_container_width=True) 
 
     if not portfolio_index.empty:
         st.subheader("Historical Performance")

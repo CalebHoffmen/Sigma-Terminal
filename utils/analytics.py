@@ -180,3 +180,10 @@ def portfolio_risk_metrics(
         "Sharpe Ratio": sharpe_ratio,
         "Maximum Drawdown": maximum_drawdown,
     }
+
+    def calculate_drawdown(portfolio_values):
+        running_max = portfolio_values.cummax()
+        drawdown = portfolio_values / running_max - 1
+        return drawdown
+
+    

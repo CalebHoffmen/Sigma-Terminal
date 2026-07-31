@@ -309,6 +309,36 @@ else:
     drawdown = calculate_drawdown(portfolio_index)
     max_drawdown = drawdown.min()
 
+    st.subheader("Drawdown Analysis")
+
+    st.metric(
+        "Maximum Drawdown",
+        f"{max_drawdown:.2%}"
+    )
+
+    fig_drawdown = go.Figure()
+
+    fig_drawdown.add_trace(
+        go.Scatter(
+            x=drawdown.index,
+            y=drawdown * 100,
+            mode="lines",
+            name="Portfolio Drawdown",
+        )
+    )
+
+    fig_drawdown.update_layout(
+        title="Portfolio Drawdown",
+        xaxis_title="Date",
+        yaxis_title="Drawdown (%)",
+    )
+
+    st.plotly_chart(
+    fig_drawdown,
+    use_container_width=True,
+    key="portfolio_drawdown_chart",
+)
+
     st.metric(
         "Maximum Drawdown",
         f"{max_drawdown:.2%}"

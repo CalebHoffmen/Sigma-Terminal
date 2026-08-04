@@ -6,6 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
+import numpy as np
+import plotly.graph_objects as go
 from utils.portfolio import calculate_portfolio_history
 from utils.analytics import calculate_drawdown
 from utils.analytics import portfolio_risk_metrics
@@ -337,6 +339,43 @@ else:
     fig_drawdown,
     use_container_width=True,
     key="portfolio_drawdown_chart",
+)
+    # Calculate daily portfolio returns
+    portfolio_returns = portfolio_index.pct_change().dropna()
+
+    # Calculate 30-day rolling annualized volatility
+    rolling_vol = (
+        portfolio_returns
+       .rolling(30)
+        .std()
+        * np.sqrt(252)
+    )
+
+    st.subheader("Rolling Risk")
+
+    fig_volatility = go.Figure()
+
+    fig_volatility.add_trace(
+        go.Scatter(
+            x=rolling_vol.index,
+            y=rolling_vol,
+            mode="lines",
+            name="30-Day Rolling Volatility",
+        )
+    )
+
+    fig_volatility.update_layout(
+        title="30-Day Rolling Annualized Volatility",
+        xaxis_title="Date",
+        yaxis_title="Annualized Volatility",
+    )
+
+    fig_volatility.update_yaxes(tickformat=".1%")
+
+    st.plotly_chart(
+        fig_volatility,
+        use_container_width=True,
+        key="rolling_volatility_chart",
 )
 
     st.metric(

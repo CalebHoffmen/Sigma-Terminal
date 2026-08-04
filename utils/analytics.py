@@ -188,4 +188,10 @@ def calculate_drawdown(portfolio_values):
     drawdown = portfolio_values / running_max - 1
     return drawdown
 
-    
+def sortino_ratio(returns, risk_free_rate=0.02):
+    downside = returns[returns < 0]
+    downside_std = downside.std() * (252 ** 0.5)
+
+    annual_return = returns.mean() * 252
+
+    return (annual_return - risk_free_rate) / downside_std   

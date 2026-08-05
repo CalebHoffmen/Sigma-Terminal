@@ -340,6 +340,24 @@ else:
     use_container_width=True,
     key="portfolio_drawdown_chart",
 )
+    st.subheader("Asset Correlation")
+
+    asset_returns = historical_prices.pct_change().dropna()
+
+    correlation_matrix = asset_returns.corr()
+
+    fig_correlation = px.imshow(
+        correlation_matrix,
+        text_auto=".2f",
+        aspect="auto",
+        title="Portfolio Correlation Matrix",
+    )
+
+    st.plotly_chart(
+        fig_correlation,
+        use_container_width=True,
+        key="portfolio_correlation_heatmap",
+    ) 
     # Calculate daily portfolio returns
     portfolio_returns = portfolio_index.pct_change().dropna()
 
@@ -377,29 +395,6 @@ else:
         use_container_width=True,
         key="rolling_volatility_chart",
 )
-
-    st.metric(
-        "Maximum Drawdown",
-        f"{max_drawdown:.2%}"
-)
-    fig_drawdown = go.Figure()
-
-    fig_drawdown.add_trace(
-    go.Scatter(
-        x=drawdown.index,
-        y=drawdown * 100,
-        mode="lines",
-        name="Portfolio Drawdown",
-    )
-)
-
-    fig_drawdown.update_layout(
-        title="Portfolio Drawdown",
-        xaxis_title="Date",
-        yaxis_title="Drawdown (%)",
-)
-
-    st.plotly_chart(fig_drawdown, use_container_width=True) 
 
     if not portfolio_index.empty:
         st.subheader("Historical Performance")

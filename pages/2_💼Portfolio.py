@@ -6,8 +6,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
-import numpy as np
-import plotly.graph_objects as go
 from utils.portfolio import calculate_portfolio_history
 from utils.analytics import calculate_drawdown
 from utils.analytics import portfolio_risk_metrics

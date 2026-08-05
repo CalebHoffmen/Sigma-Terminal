@@ -1,4 +1,55 @@
 import pandas as pd
+import numpy as np
+
+
+class risk_free_rate:
+    """
+    Lightweight wrapper for a constant annual risk-free rate.
+
+    This class provides both the annualized rate and the equivalent
+    per-period rate for use in Sharpe/Sortino calculations.
+    """
+
+    def __init__(self, annual_rate: float = 0.04) -> None:
+        if annual_rate < 0:
+            raise ValueError("The annual risk-free rate must be non-negative.")
+
+        self.annual_rate = float(annual_rate)
+
+    def get_rate(self, periods_per_year: int = 252) -> float:
+        """
+        Return the annualized risk-free rate.
+
+        Parameters
+        ----------
+        periods_per_year : int
+            Number of periods per year. Included for API compatibility.
+
+        Returns
+        -------
+        float
+            The annual risk-free rate as a decimal.
+        """
+        return self.annual_rate
+
+    def get_period_rate(self, periods_per_year: int = 252) -> float:
+        """
+        Return the equivalent per-period risk-free rate.
+
+        Parameters
+        ----------
+        periods_per_year : int
+            Number of periods per year for conversion.
+
+        Returns
+        -------
+        float
+            Risk-free rate per period, expressed as a decimal.
+        """
+        if periods_per_year <= 0:
+            raise ValueError("periods_per_year must be a positive integer.")
+
+        return self.annual_rate / periods_per_year
 
 
 def daily_returns(prices: pd.Series) -> pd.Series:
@@ -195,3 +246,22 @@ def sortino_ratio(returns, risk_free_rate=0.02):
     annual_return = returns.mean() * 252
 
     return (annual_return - risk_free_rate) / downside_std   
+
+def sortino_ratio(
+    returns: pd.Series,
+    risk_free_rate: float = 0.02,
+) -> float:
+    downside_returns = returns[returns < 0]
+
+    if downside_returns.empty:
+        return float("nan")
+
+    downside_deviation = downside_returns.std() * np.sqrt(252)
+    annualized_return = returns.mean() * 252
+
+    if downside_deviation == 0:
+        return float("nan")
+
+    return (
+        annualized_return - risk_free_rate
+    ) / downside_deviation

@@ -7,12 +7,16 @@ import plotly.graph_objects as go
 import streamlit as st
 import yfinance as yf
 from utils.portfolio import calculate_portfolio_history
-from utils.analytics import calculate_drawdown
-from utils.analytics import portfolio_risk_metrics
+from utils.analytics import (
+    calculate_drawdown,
+    portfolio_risk_metrics,
+    sortino_ratio,
+)
 from utils.data import (
     download_current_prices,
     download_historical_prices,
 )
+from utils.stress_test import stress_test_portfolio
 st.set_page_config(
     page_title="Portfolio | Sigma Terminal",
     page_icon="💼",
@@ -356,9 +360,37 @@ else:
         use_container_width=True,
         key="portfolio_correlation_heatmap",
     ) 
+
+    stress = st.slider(
+        "Market Shock (%)",
+        -50,
+        0,
+        -20,
+    )
+
+    stressed = stress_test_portfolio(
+        holdings,
+        stress / 100,
+    )
+
+    st.subheader("Portfolio Stress Test")
+
+    st.dataframe(
+        stressed[
+            [
+                "Ticker",
+                "Market Value",
+                "Scenario Value",
+                "Loss",
+            ]
+        ],
+        use_container_width=True,
+    )
+
+
     # Calculate daily portfolio returns
     portfolio_returns = portfolio_index.pct_change().dropna()
-
+    portfolio_sortino = sortino_ratio(portfolio_returns)
     # Calculate 30-day rolling annualized volatility
     rolling_vol = (
         portfolio_returns
@@ -468,6 +500,12 @@ else:
             f"{portfolio_metrics['Maximum Drawdown']:.2%}",
         )
 
+st.metric(
+    "Sortino Ratio",
+    f"{portfolio_sortino:.2f}"
+    if pd.notna(portfolio_sortino)
+    else "Not available",
+)
 
 csv_data = holdings.to_csv(index=False).encode("utf-8")
 

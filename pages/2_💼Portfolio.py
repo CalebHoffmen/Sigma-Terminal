@@ -17,6 +17,7 @@ from utils.data import (
     download_historical_prices,
 )
 from utils.stress_test import stress_test_portfolio
+from utils.scenarios import SCENARIOS
 st.set_page_config(
     page_title="Portfolio | Sigma Terminal",
     page_icon="💼",
@@ -387,7 +388,52 @@ else:
         use_container_width=True,
     )
 
+    st.subheader("Scenario Stress Test")
 
+    scenario_name = st.selectbox(
+        "Select Scenario",
+        list(SCENARIOS.keys()),
+        key="stress_scenario_selector",
+    )
+
+    scenario = SCENARIOS[scenario_name]
+
+    scenario_results = holdings.copy()
+
+    scenario_results["Shock"] = scenario_results["Ticker"].apply(
+        lambda ticker: scenario.get(
+            ticker,
+            scenario.get("default", 0.0),
+        )
+    )
+
+    scenario_results["Scenario Value"] = (
+        scenario_results["Market Value"]
+        * (1 + scenario_results["Shock"])
+    )
+
+    scenario_results["Scenario P&L"] = (
+        scenario_results["Scenario Value"]
+      - scenario_results["Market Value"]
+    )
+
+    scenario_results["Shock"] = scenario_results["Shock"].map(
+        lambda x: f"{x:.1%}"
+    )
+
+    st.dataframe(
+        scenario_results[
+            [
+                "Ticker",
+                "Market Value",
+                "Shock",
+                "Scenario Value",
+                "Scenario P&L",
+            ]
+        ],
+        use_container_width=True,
+        hide_index=True,
+    )
     # Calculate daily portfolio returns
     portfolio_returns = portfolio_index.pct_change().dropna()
     portfolio_sortino = sortino_ratio(portfolio_returns)

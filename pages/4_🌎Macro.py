@@ -4,6 +4,11 @@ import plotly.express as px
 from utils.macro_data import get_fred_series
 treasury_2y = get_fred_series("DGS2")
 treasury_10y = get_fred_series("DGS10")
+gdp = get_fred_series("GDPC1")
+
+gdp["GDP Growth"] = (
+    gdp["GDPC1"].pct_change(4) * 100
+)
 
 yield_data = treasury_2y.join(
     treasury_10y,
@@ -125,4 +130,30 @@ st.plotly_chart(
     fig_spread,
     use_container_width=True,
     key="treasury_spread_chart",
+)
+
+st.subheader("Economic Growth")
+
+latest_gdp_growth = gdp["GDP Growth"].dropna().iloc[-1]
+
+st.metric(
+    "Real GDP Growth (YoY)",
+    f"{latest_gdp_growth:.2f}%",
+)
+
+fig_gdp = px.line(
+    gdp,
+    x=gdp.index,
+    y="GDP Growth",
+    title="U.S. Real GDP Growth",
+)
+
+fig_gdp.update_yaxes(
+    title="YoY Growth (%)"
+)
+
+st.plotly_chart(
+    fig_gdp,
+    use_container_width=True,
+    key="gdp_growth_chart",
 )

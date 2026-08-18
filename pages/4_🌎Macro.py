@@ -4,11 +4,8 @@ import plotly.express as px
 from utils.macro_data import get_fred_series
 treasury_2y = get_fred_series("DGS2")
 treasury_10y = get_fred_series("DGS10")
-gdp = get_fred_series("GDPC1")
 
-gdp["GDP Growth"] = (
-    gdp["GDPC1"].pct_change(4) * 100
-)
+
 
 yield_data = treasury_2y.join(
     treasury_10y,
@@ -35,6 +32,25 @@ cpi = get_fred_series("CPIAUCSL")
 cpi["Inflation"] = (
     cpi["CPIAUCSL"].pct_change(12) * 100
 )
+
+gdp = get_fred_series("GDPC1")
+
+gdp["GDP Growth"] = (
+    gdp["GDPC1"].pct_change(4) * 100
+)
+
+latest_growth = gdp["GDP Growth"].dropna().iloc[-1]
+latest_inflation = cpi["Inflation"].dropna().iloc[-1]
+
+if latest_growth >= 2 and latest_inflation < 3:
+    regime = "Expansion"
+elif latest_growth >= 2 and latest_inflation >= 3:
+    regime = "Inflationary Growth"
+elif latest_growth < 2 and latest_inflation >= 3:
+    regime = "Stagflation Risk"
+else:
+    regime = "Slowdown"
+
 
 st.subheader("Federal Funds Rate")
 
@@ -156,4 +172,16 @@ st.plotly_chart(
     fig_gdp,
     use_container_width=True,
     key="gdp_growth_chart",
+)
+
+st.subheader("Economic Regime")
+
+st.metric(
+    "Current Regime",
+    regime,
+)
+
+st.caption(
+    "Classification based on year-over-year real GDP growth "
+    "and CPI inflation."
 )

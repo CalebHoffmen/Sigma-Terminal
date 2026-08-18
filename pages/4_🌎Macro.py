@@ -27,6 +27,12 @@ st.title("🌎 Macroeconomic Dashboard")
 fed_funds = get_fred_series("FEDFUNDS")
 unemployment = get_fred_series("UNRATE")
 
+unemployment["3M Average"] = (
+    unemployment["UNRATE"]
+    .rolling(3)
+    .mean()
+)
+
 cpi = get_fred_series("CPIAUCSL")
 
 cpi["Inflation"] = (
@@ -184,4 +190,43 @@ st.metric(
 st.caption(
     "Classification based on year-over-year real GDP growth "
     "and CPI inflation."
+)
+
+st.subheader("Labor Market Trend")
+
+latest_unemployment = unemployment["UNRATE"].dropna().iloc[-1]
+latest_3m_avg = unemployment["3M Average"].dropna().iloc[-1]
+
+if latest_unemployment > latest_3m_avg:
+    labor_trend = "Weakening"
+elif latest_unemployment < latest_3m_avg:
+    labor_trend = "Improving"
+else:
+    labor_trend = "Stable"
+
+col1, col2 = st.columns(2)
+
+col1.metric(
+    "Unemployment Rate",
+    f"{latest_unemployment:.1f}%",
+)
+
+col2.metric(
+    "Labor Market Trend",
+    labor_trend,
+)
+
+fig_labor = px.line(
+    unemployment,
+    x=unemployment.index,
+    y=["UNRATE", "3M Average"],
+    title="Unemployment Rate vs. 3-Month Average",
+)
+
+fig_labor.update_yaxes(title="Unemployment Rate (%)")
+
+st.plotly_chart(
+    fig_labor,
+    use_container_width=True,
+    key="labor_market_trend_chart",
 )

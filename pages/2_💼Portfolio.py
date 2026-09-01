@@ -10,6 +10,7 @@ from utils.portfolio import calculate_portfolio_history
 from utils.analytics import (
     calculate_drawdown,
     portfolio_risk_metrics,
+    cagr,
     sortino_ratio,
 )
 from utils.data import (
@@ -436,6 +437,7 @@ else:
     )
     # Calculate daily portfolio returns
     portfolio_returns = portfolio_index.pct_change().dropna()
+    portfolio_cagr = cagr(portfolio_index)
     portfolio_sortino = sortino_ratio(portfolio_returns)
     # Calculate 30-day rolling annualized volatility
     rolling_vol = (
@@ -517,9 +519,8 @@ else:
 
         st.subheader("Portfolio Risk and Performance")
 
-        risk_1, risk_2, risk_3, risk_4, risk_5 = (
-            st.columns(5)
-        )
+        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6, risk_7 = st.columns(7)
+        
 
         risk_1.metric(
             "Total Return",
@@ -545,13 +546,20 @@ else:
             "Maximum Drawdown",
             f"{portfolio_metrics['Maximum Drawdown']:.2%}",
         )
+        risk_6.metric(
+            "CAGR",
+            f"{portfolio_cagr:.2%}"
+            if pd.notna(portfolio_cagr)
+            else "N/A",
+        )
 
-st.metric(
-    "Sortino Ratio",
-    f"{portfolio_sortino:.2f}"
-    if pd.notna(portfolio_sortino)
-    else "Not available",
-)
+        risk_7.metric(
+            "Sortino Ratio",
+             f"{portfolio_sortino:.2f}"
+             if pd.notna(portfolio_sortino)
+             else "N/A",
+        )
+
 
 csv_data = holdings.to_csv(index=False).encode("utf-8")
 

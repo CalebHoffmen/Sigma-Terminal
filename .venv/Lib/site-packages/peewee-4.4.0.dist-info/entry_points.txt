@@ -1,0 +1,3 @@
+[console_scripts]
+pwiz = pwiz:main
+pwmigrate = playhouse.migrations:main

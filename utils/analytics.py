@@ -156,9 +156,6 @@ def sharpe_ratio(
 
     return (annual_return - risk_free_rate) / annual_vol
 
-import numpy as np
-import pandas as pd
-
 
 def portfolio_risk_metrics(
     return_index: pd.Series,
@@ -239,13 +236,23 @@ def calculate_drawdown(portfolio_values):
     drawdown = portfolio_values / running_max - 1
     return drawdown
 
-def sortino_ratio(returns, risk_free_rate=0.02):
-    downside = returns[returns < 0]
-    downside_std = downside.std() * (252 ** 0.5)
 
-    annual_return = returns.mean() * 252
+def cagr(return_index):
+    if return_index.empty or len(return_index) < 2:
+        return float("nan")
 
-    return (annual_return - risk_free_rate) / downside_std   
+    start_value = return_index.iloc[0]
+    end_value = return_index.iloc[-1]
+
+    days = (return_index.index[-1] - return_index.index[0]).days
+
+    if days <= 0 or start_value <= 0:
+        return float("nan")
+
+    years = days / 365.25
+
+    return (end_value / start_value) ** (1 / years) - 1
+
 
 def sortino_ratio(
     returns: pd.Series,

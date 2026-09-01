@@ -1,0 +1,141 @@
+#                   --- THIS FILE IS AUTO-GENERATED ---
+# Modifications will be overwitten the next time code generation run.
+
+from plotly.basedatatypes import BaseTraceHierarchyType as _BaseTraceHierarchyType
+import copy as _copy
+
+
+class Bar(_BaseTraceHierarchyType):
+    _parent_path_str = "indicator.gauge"
+    _path_str = "indicator.gauge.bar"
+    _valid_props = {"color", "line", "thickness"}
+
+    @property
+    def color(self):
+        """
+        Sets the background color of the arc.
+
+        The 'color' property is a color and may be specified as a string in the following formats:
+          - hex or short hex (e.g. '#d3d3d3', '#d3d')
+          - hex or short hex with alpha (e.g. '#d3d3d380', '#d3d8')
+          - rgb (e.g. 'rgb(255, 0, 0)', 'rgb(255 0 0)')
+          - rgba (e.g. 'rgba(255, 0, 0, 0.5)', 'rgba(255 0 0 / 0.5)')
+          - hsl (e.g. 'hsl(0, 100%, 50%)', 'hsl(0deg 100% 50%)')
+          - hsla (e.g. 'hsla(0, 100%, 50%, 0.5)', 'hsla(0deg 100% 50% / 0.5)')
+          - hwb (e.g. 'hwb(0 0% 100%)')
+          - lab/lch/oklab/oklch (e.g. 'oklch(0.7 0.15 180)')
+          - color (e.g. 'color(display-p3 1 0 0)')
+          - named colors (full list: https://www.w3.org/TR/css-color-4/#named-color)
+          - Any other supported CSS 4 color format: https://www.w3.org/TR/css-color-4/
+
+        Returns
+        -------
+        str
+        """
+        return self["color"]
+
+    @color.setter
+    def color(self, val):
+        self["color"] = val
+
+    @property
+    def line(self):
+        """
+        The 'line' property is an instance of Line
+        that may be specified as:
+          - An instance of :class:`plotly.graph_objs.indicator.gauge.bar.Line`
+          - A dict of string/value properties that will be passed
+            to the Line constructor
+
+        Returns
+        -------
+        plotly.graph_objs.indicator.gauge.bar.Line
+        """
+        return self["line"]
+
+    @line.setter
+    def line(self, val):
+        self["line"] = val
+
+    @property
+    def thickness(self):
+        """
+        Sets the thickness of the bar as a fraction of the total
+        thickness of the gauge.
+
+        The 'thickness' property is a number and may be specified as:
+          - An int or float in the interval [0, 1]
+
+        Returns
+        -------
+        int|float
+        """
+        return self["thickness"]
+
+    @thickness.setter
+    def thickness(self, val):
+        self["thickness"] = val
+
+    @property
+    def _prop_descriptions(self):
+        return """\
+        color
+            Sets the background color of the arc.
+        line
+            :class:`plotly.graph_objects.indicator.gauge.bar.Line`
+            instance or dict with compatible properties
+        thickness
+            Sets the thickness of the bar as a fraction of the
+            total thickness of the gauge.
+        """
+
+    def __init__(self, arg=None, color=None, line=None, thickness=None, **kwargs):
+        """
+        Construct a new Bar object
+
+        Set the appearance of the gauge's value
+
+        Parameters
+        ----------
+        arg
+            dict of properties compatible with this constructor or
+            an instance of
+            :class:`plotly.graph_objs.indicator.gauge.Bar`
+        color
+            Sets the background color of the arc.
+        line
+            :class:`plotly.graph_objects.indicator.gauge.bar.Line`
+            instance or dict with compatible properties
+        thickness
+            Sets the thickness of the bar as a fraction of the
+            total thickness of the gauge.
+
+        Returns
+        -------
+        Bar
+        """
+        super().__init__("bar")
+        if "_parent" in kwargs:
+            self._parent = kwargs["_parent"]
+            return
+
+        if arg is None:
+            arg = {}
+        elif isinstance(arg, self.__class__):
+            arg = arg.to_plotly_json()
+        elif isinstance(arg, dict):
+            arg = _copy.copy(arg)
+        else:
+            raise ValueError("""\
+The first argument to the plotly.graph_objs.indicator.gauge.Bar
+constructor must be a dict or
+an instance of :class:`plotly.graph_objs.indicator.gauge.Bar`""")
+
+        self._skip_invalid = kwargs.pop("skip_invalid", False)
+        self._validate = kwargs.pop("_validate", True)
+
+        self._set_property("color", arg, color)
+        self._set_property("line", arg, line)
+        self._set_property("thickness", arg, thickness)
+        self._process_kwargs(**dict(arg, **kwargs))
+        self._skip_invalid = False

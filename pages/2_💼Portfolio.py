@@ -12,6 +12,7 @@ from utils.analytics import (
     portfolio_risk_metrics,
     cagr,
     sortino_ratio,
+    alpha_beta,
 )
 from utils.data import (
     download_current_prices,
@@ -439,6 +440,12 @@ else:
     portfolio_returns = portfolio_index.pct_change().dropna()
     portfolio_cagr = cagr(portfolio_index)
     portfolio_sortino = sortino_ratio(portfolio_returns)
+    benchmark_returns = benchmark_index.pct_change().dropna()
+
+    portfolio_alpha, portfolio_beta = alpha_beta(
+        portfolio_returns,
+        benchmark_returns,
+    )
     # Calculate 30-day rolling annualized volatility
     rolling_vol = (
         portfolio_returns
@@ -519,7 +526,7 @@ else:
 
         st.subheader("Portfolio Risk and Performance")
 
-        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6, risk_7 = st.columns(7)
+        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6, risk_7, risk_8, risk_9 = st.columns(9)
         
 
         risk_1.metric(
@@ -558,6 +565,20 @@ else:
              f"{portfolio_sortino:.2f}"
              if pd.notna(portfolio_sortino)
              else "N/A",
+        )
+
+        risk_8.metric(
+            "Alpha",
+            f"{portfolio_alpha:.2%}"
+            if pd.notna(portfolio_alpha)
+            else "N/A",
+        )
+
+        risk_9.metric(
+            "Beta",
+            f"{portfolio_beta:.2f}"
+            if pd.notna(portfolio_beta)
+            else "N/A",
         )
 
 

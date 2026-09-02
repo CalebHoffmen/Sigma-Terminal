@@ -272,3 +272,42 @@ def sortino_ratio(
     return (
         annualized_return - risk_free_rate
     ) / downside_deviation
+
+
+def alpha_beta(
+    portfolio_returns: pd.Series,
+    benchmark_returns: pd.Series,
+    risk_free_rate: float = 0.02,
+) -> tuple[float, float]:
+    """
+    Calculate annualized portfolio alpha and beta
+    relative to a benchmark.
+    """
+
+    combined = pd.concat(
+        [portfolio_returns, benchmark_returns],
+        axis=1,
+    ).dropna()
+
+    if len(combined) < 2:
+        return float("nan"), float("nan")
+
+    portfolio = combined.iloc[:, 0]
+    benchmark = combined.iloc[:, 1]
+
+    benchmark_variance = benchmark.var()
+
+    if benchmark_variance == 0:
+        return float("nan"), float("nan")
+
+    beta = portfolio.cov(benchmark) / benchmark_variance
+
+    portfolio_annual_return = portfolio.mean() * 252
+    benchmark_annual_return = benchmark.mean() * 252
+
+    alpha = portfolio_annual_return - (
+        risk_free_rate
+        + beta * (benchmark_annual_return - risk_free_rate)
+    )
+
+    return alpha, beta

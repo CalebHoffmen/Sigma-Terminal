@@ -13,6 +13,7 @@ from utils.analytics import (
     cagr,
     sortino_ratio,
     alpha_beta,
+    historical_var,
 )
 from utils.data import (
     download_current_prices,
@@ -440,6 +441,7 @@ else:
     portfolio_returns = portfolio_index.pct_change().dropna()
     portfolio_cagr = cagr(portfolio_index)
     portfolio_sortino = sortino_ratio(portfolio_returns)
+    portfolio_var = historical_var(portfolio_returns)
     benchmark_returns = benchmark_index.pct_change().dropna()
 
     portfolio_alpha, portfolio_beta = alpha_beta(
@@ -526,8 +528,7 @@ else:
 
         st.subheader("Portfolio Risk and Performance")
 
-        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6, risk_7, risk_8, risk_9 = st.columns(9)
-        
+        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6, risk_7, risk_8, risk_9, risk_10 = st.columns(10)
 
         risk_1.metric(
             "Total Return",
@@ -579,6 +580,12 @@ else:
             f"{portfolio_beta:.2f}"
             if pd.notna(portfolio_beta)
             else "N/A",
+        )
+
+        with risk_10:
+            st.metric(
+                "95% VaR",
+                f"{portfolio_var:.2%}" if not np.isnan(portfolio_var) else "N/A",
         )
 
 

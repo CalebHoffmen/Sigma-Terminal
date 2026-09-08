@@ -311,3 +311,24 @@ def alpha_beta(
     )
 
     return alpha, beta
+
+def historical_var(
+    returns: pd.Series,
+    confidence_level: float = 0.95,
+) -> float:
+    """
+    Calculate Historical Value at Risk (VaR).
+
+    Returns the loss threshold at the specified confidence level.
+    """
+    clean_returns = returns.dropna()
+
+    if clean_returns.empty:
+        return float("nan")
+
+    percentile = np.percentile(
+        clean_returns,
+        (1 - confidence_level) * 100,
+    )
+
+    return -percentile

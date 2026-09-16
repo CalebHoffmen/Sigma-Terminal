@@ -195,6 +195,12 @@ holdings["Weight"] = (
     holdings["Market Value"] / total_market_value
 )
 
+largest_position = holdings["Weight"].max()
+
+largest_ticker = holdings.loc[
+    holdings["Weight"].idxmax(),
+    "Ticker"
+]
 
 metric_1, metric_2, metric_3, metric_4 = st.columns(4)
 
@@ -260,6 +266,12 @@ allocation_tab, profit_loss_tab = st.tabs(
 )
 
 with allocation_tab:
+
+      st.metric(
+          "Largest Position",
+          f"{largest_ticker} ({largest_position:.1%})"
+    )
+
     allocation_chart = px.pie(
         holdings,
         names="Ticker",
@@ -441,6 +453,8 @@ else:
     )
     # Calculate daily portfolio returns
     portfolio_returns = portfolio_index.pct_change().dropna()
+    best_day = portfolio_returns.max()
+    worst_day = portfolio_returns.min()
     portfolio_cagr = cagr(portfolio_index)
     portfolio_sortino = sortino_ratio(portfolio_returns)
     portfolio_var = historical_var(portfolio_returns)
@@ -538,7 +552,7 @@ else:
 
         st.subheader("Portfolio Risk and Performance")
 
-        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6, risk_7, risk_8, risk_9, risk_10, risk_11 = st.columns(11)
+        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6 = st.columns(6) 
 
         risk_1.metric(
             "Total Return",
@@ -571,6 +585,8 @@ else:
             else "N/A",
         )
 
+        risk_7, risk_8, risk_9, risk_10, risk_11 = st.columns(5)
+        
         risk_7.metric(
             "Sortino Ratio",
              f"{portfolio_sortino:.2f}"

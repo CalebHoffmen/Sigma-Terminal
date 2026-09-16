@@ -609,6 +609,37 @@ else:
         st.subheader("Monte Carlo Portfolio Forecast")
 
 if not monte_carlo_results.empty:
+    ending_values = monte_carlo_results.iloc[-1]
+
+    median_ending_value = ending_values.median()
+    downside_value = ending_values.quantile(0.05)
+    upside_value = ending_values.quantile(0.95)
+
+    probability_of_loss = (
+        ending_values < total_market_value
+    ).mean()
+
+    mc_1, mc_2, mc_3, mc_4 = st.columns(4)
+
+    mc_1.metric(
+        "Median Ending Value",
+        f"${median_ending_value:,.2f}",
+    )
+
+    mc_2.metric(
+        "5th Percentile",
+        f"${downside_value:,.2f}",
+    )
+
+    mc_3.metric(
+        "95th Percentile",
+        f"${upside_value:,.2f}",
+    ) 
+
+    mc_4.metric(
+        "Probability of Loss",
+        f"{probability_of_loss:.1%}",
+    )
 
     fig_monte_carlo = go.Figure()
 

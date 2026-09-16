@@ -14,6 +14,7 @@ from utils.analytics import (
     sortino_ratio,
     alpha_beta,
     historical_var,
+    conditional_var,
 )
 from utils.data import (
     download_current_prices,
@@ -21,6 +22,7 @@ from utils.data import (
 )
 from utils.stress_test import stress_test_portfolio
 from utils.scenarios import SCENARIOS
+from utils.monte_carlo import monte_carlo_simulation
 st.set_page_config(
     page_title="Portfolio | Sigma Terminal",
     page_icon="💼",
@@ -442,7 +444,15 @@ else:
     portfolio_cagr = cagr(portfolio_index)
     portfolio_sortino = sortino_ratio(portfolio_returns)
     portfolio_var = historical_var(portfolio_returns)
+    portfolio_cvar = conditional_var(portfolio_returns)
     benchmark_returns = benchmark_index.pct_change().dropna()
+
+    monte_carlo_results = monte_carlo_simulation(
+    portfolio_returns,
+    total_market_value,
+    days=252,
+    simulations=1000,
+)
 
     portfolio_alpha, portfolio_beta = alpha_beta(
         portfolio_returns,
@@ -528,7 +538,7 @@ else:
 
         st.subheader("Portfolio Risk and Performance")
 
-        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6, risk_7, risk_8, risk_9, risk_10 = st.columns(10)
+        risk_1, risk_2, risk_3, risk_4, risk_5, risk_6, risk_7, risk_8, risk_9, risk_10, risk_11 = st.columns(11)
 
         risk_1.metric(
             "Total Return",
@@ -587,6 +597,56 @@ else:
                 "95% VaR",
                 f"{portfolio_var:.2%}" if not np.isnan(portfolio_var) else "N/A",
         )
+       
+        with risk_11:
+            st.metric(
+            "95% CVaR",
+            f"{portfolio_cvar:.2%}"
+            if not np.isnan(portfolio_cvar)
+            else "N/A",
+        )
+
+        st.subheader("Monte Carlo Portfolio Forecast")
+
+if not monte_carlo_results.empty:
+
+    fig_monte_carlo = go.Figure()
+
+    # Plot a sample of simulation paths
+    paths_to_plot = min(100, monte_carlo_results.shape[1])
+
+    for simulation in range(paths_to_plot):
+        fig_monte_carlo.add_trace(
+            go.Scatter(
+                x=monte_carlo_results.index,
+                y=monte_carlo_results.iloc[:, simulation],
+                mode="lines",
+                line=dict(width=1),
+                opacity=0.15,
+                showlegend=False,
+            )
+        )
+
+    fig_monte_carlo.update_layout(
+        title="1-Year Monte Carlo Portfolio Simulation",
+        xaxis_title="Trading Days",
+        yaxis_title="Portfolio Value ($)",
+        height=550,
+    )
+
+    fig_monte_carlo.update_yaxes(
+        tickprefix="$",
+        tickformat=",.0f",
+    )
+
+    st.plotly_chart(
+        fig_monte_carlo,
+        use_container_width=True,
+        key="monte_carlo_forecast",
+    )
+
+else:
+    st.warning("Monte Carlo simulation could not be calculated.")
 
 
 csv_data = holdings.to_csv(index=False).encode("utf-8")

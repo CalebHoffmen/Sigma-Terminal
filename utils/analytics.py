@@ -332,3 +332,30 @@ def historical_var(
     )
 
     return -percentile
+
+def conditional_var(
+    returns: pd.Series,
+    confidence_level: float = 0.95,
+) -> float:
+    """
+    Historical Conditional Value at Risk (CVaR).
+
+    Measures the average loss on days where losses
+    exceed the historical VaR threshold.
+    """
+    clean_returns = returns.dropna()
+
+    if clean_returns.empty:
+        return float("nan")
+
+    cutoff = np.percentile(
+        clean_returns,
+        (1 - confidence_level) * 100
+    )
+
+    tail_losses = clean_returns[clean_returns <= cutoff]
+
+    if tail_losses.empty:
+        return float("nan")
+
+    return abs(tail_losses.mean())

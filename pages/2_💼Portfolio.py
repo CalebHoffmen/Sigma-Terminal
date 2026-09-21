@@ -201,6 +201,9 @@ largest_ticker = holdings.loc[
     holdings["Weight"].idxmax(),
     "Ticker"
 ]
+effective_holdings = 1 / np.sum(holdings["Weight"] ** 2)
+
+concentration_index = np.sum(holdings["Weight"] ** 2)
 
 metric_1, metric_2, metric_3, metric_4 = st.columns(4)
 
@@ -267,10 +270,23 @@ allocation_tab, profit_loss_tab = st.tabs(
 
 with allocation_tab:
 
-      st.metric(
-          "Largest Position",
-          f"{largest_ticker} ({largest_position:.1%})"
+    allocation_1, allocation_2, allocation_3 = st.columns(3)
+
+    allocation_1.metric(
+       "Largest Position",
+       f"{largest_ticker} ({largest_position:.1%})"
     )
+ 
+    allocation_2.metric(
+        "Effective Holdings",
+        f"{effective_holdings:.2f}"
+    )
+
+    allocation_3.metric(
+        "Concentration Index",
+        f"{concentration_index:.3f}"
+    )
+
 
     allocation_chart = px.pie(
         holdings,
